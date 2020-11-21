@@ -26,7 +26,7 @@ class EntityWithMediaList
     private $name;
 
     /**
-     * @ORM\OneToMany(targetEntity=Media::class, mappedBy="entityMediaOne")
+     * @ORM\OneToMany(targetEntity=Media::class, mappedBy="entityWithMediaList")
      */
     private $mediaList;
 
