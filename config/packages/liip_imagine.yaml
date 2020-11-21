@@ -1,0 +1,22 @@
+liip_imagine:
+    driver: "gd"
+    resolvers:
+        default:
+            web_path: ~
+    filter_sets:
+        cache: ~
+        media_down_scale:
+            quality: 75
+            filters:
+                scale:
+                    to: 0.5
+        entity_with_image_down_scale:
+            quality: 75
+            filters:
+                scale:
+                    to: 0.5
+        entity_with_media_and_image_down_scale:
+            quality: 75
+            filters:
+                scale:
+                    to: 0.5
