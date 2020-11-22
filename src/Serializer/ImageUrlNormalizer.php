@@ -2,6 +2,8 @@
 
 namespace App\Serializer;
 
+use App\Entity\EntityWithImage;
+use App\Entity\EntityWithMediaAndImage;
 use App\Entity\Media;
 use ArrayObject;
 use InvalidArgumentException;
@@ -11,6 +13,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerAwareInterface;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Component\Serializer\SerializerInterface;
+use Vich\UploaderBundle\Storage\StorageInterface;
 
 /**
  * Class ImageUrlNormalizer
@@ -22,17 +25,24 @@ final class ImageUrlNormalizer implements NormalizerInterface, DenormalizerInter
      * @var DenormalizerInterface|NormalizerInterface
      */
     private $decorated;
+
     /**
      * @var CacheManager
      */
     private $cacheManager;
 
     /**
+     * @var StorageInterface
+     */
+    private $storage;
+
+    /**
      * ImageUrlNormalizer constructor.
      * @param NormalizerInterface $decorated
      * @param CacheManager $cacheManager
+     * @param StorageInterface $storage
      */
-    public function __construct(NormalizerInterface $decorated, CacheManager $cacheManager)
+    public function __construct(NormalizerInterface $decorated, CacheManager $cacheManager, StorageInterface $storage)
     {
         if (!$decorated instanceof DenormalizerInterface) {
             throw new InvalidArgumentException(sprintf('The decorated normalizer must implement the %s.', DenormalizerInterface::class));
@@ -40,6 +50,7 @@ final class ImageUrlNormalizer implements NormalizerInterface, DenormalizerInter
 
         $this->decorated = $decorated;
         $this->cacheManager = $cacheManager;
+        $this->storage = $storage;
     }
 
     /**
@@ -63,10 +74,30 @@ final class ImageUrlNormalizer implements NormalizerInterface, DenormalizerInter
     {
         $data = $this->decorated->normalize($object, $format, $context);
         if ($object instanceof Media) {
-            $data['imageUrl'] = $this->cacheManager->generateUrl($object->getImageName(), 'media_down_scale');
+            $data['imageUrl'] = $this->generateImageUrl($object, 'imageFile', 'media_down_scale');
+        } elseif ($object instanceof EntityWithImage) {
+            $data['imageUrl'] = $this->generateImageUrl($object, 'imageFile', 'entity_with_image_down_scale');
+        } elseif ($object instanceof EntityWithMediaAndImage) {
+            $data['imageUrl'] = $this->generateImageUrl($object, 'imageFile', 'entity_with_media_and_image_down_scale');
         }
 
         return $data;
+    }
+
+    /**
+     * @param $object
+     * @param $imageFileFieldName
+     * @param $filter
+     * @return string|null
+     */
+    public function generateImageUrl($object, $imageFileFieldName, $filter): ?string
+    {
+        $originalImageUrl = $this->storage->resolveUri($object, $imageFileFieldName);
+        if (null !== $originalImageUrl) {
+            return $this->cacheManager->generateUrl($originalImageUrl, $filter);
+        }
+
+        return null;
     }
 
     /**

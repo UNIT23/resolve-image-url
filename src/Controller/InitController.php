@@ -2,37 +2,37 @@
 
 namespace App\Controller;
 
-use App\Service\TestService;
+use App\Service\InitService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class TestController
+ * Class InitController
  * @package App\Controller
  */
-class TestController extends AbstractController
+class InitController extends AbstractController
 {
     /**
-     * @var TestService
+     * @var InitService
      */
-    private $testService;
+    private $initService;
 
     /**
-     * TestController constructor.
-     * @param TestService $testService
+     * InitController constructor.
+     * @param InitService $initService
      */
-    public function __construct(TestService $testService)
+    public function __construct(InitService $initService)
     {
-        $this->testService = $testService;
+        $this->initService = $initService;
     }
 
     /**
-     * @Route("/test", name="test")
+     * @Route("/", name="init")
      */
     public function index(): Response
     {
-        $this->testService->initData();
+        $this->initService->initData();
 
         return $this->render('test/index.html.twig');
     }

@@ -4,11 +4,22 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *     collectionOperations={
+ *          "get"={"normalization_context"={"groups"="media"}}
+ *     },
+ *     itemOperations={
+ *          "get"={"normalization_context"={"groups"="media"},}
+ *     }
+ * )
  * @ORM\Entity()
+ * @Vich\Uploadable
  */
 class Media
 {
@@ -22,16 +33,25 @@ class Media
     /**
      * @ORM\Column(type="string", length=255)
      *
-     * @Groups({"entity_with_media_list"})
+     * @Groups({"media", "entity_with_media_list", "entity_with_image", "entity_with_media_and_image"})
      */
     private $name;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255)
      *
-     * @Groups({"entity_with_media_list"})
+     * @Groups({"media", "entity_with_media_list", "entity_with_image", "entity_with_media_and_image"})
      */
     private $imageName;
+
+    /**
+     * NOTE: This is not a mapped field of entity metadata, just a simple property.
+     *
+     * @Vich\UploadableField(mapping="media", fileNameProperty="imageName")
+     *
+     * @var File|null
+     */
+    private $imageFile;
 
     /**
      * @ORM\ManyToOne(targetEntity=EntityWithMediaList::class, inversedBy="mediaList")
@@ -74,14 +94,30 @@ class Media
     }
 
     /**
-     * @param string|null $imageName
+     * @param string $imageName
      * @return $this
      */
-    public function setImageName(?string $imageName): self
+    public function setImageName(string $imageName): self
     {
         $this->imageName = $imageName;
 
         return $this;
+    }
+
+    /**
+     * @param File|UploadedFile|null $imageFile
+     */
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+    }
+
+    /**
+     * @return File|null
+     */
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
     }
 
     /**
