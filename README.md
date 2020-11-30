@@ -7,6 +7,7 @@ This project show how resolve image urls automatically for entities with image f
 - Mysql 5.7
 
 ## Bundles used
+- [Symfony 5.1](https://github.com/symfony/symfony)
 - [Api Platform](https://github.com/api-platform/api-platform)
 - [LiipImagineBundle](https://github.com/liip/LiipImagineBundle)
 - [VichUploaderBundle](https://github.com/dustin10/VichUploaderBundle)
